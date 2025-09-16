@@ -1,4 +1,119 @@
 import streamlit as st
+import random
+
+# Initialisation de la grille et des variables
+if 'grid' not in st.session_state:
+    st.session_state.grid = [[0 for _ in range(3)] for _ in range(3)]
+if 'selected' not in st.session_state:
+    st.session_state.selected = (0, 0)
+if 'tour' not in st.session_state:
+    st.session_state.tour = 1  # 1 = joueur 1, 2 = IA
+if 'max_soldats_j1' not in st.session_state:
+    st.session_state.max_soldats_j1 = 3
+if 'max_soldats_ia' not in st.session_state:
+    st.session_state.max_soldats_ia = 3
+
+st.title("Placement des soldats sur la grille 3x3")
+
+# Affichage du nombre de soldats placés
+soldats_j1 = sum(cell == 1 for row in st.session_state.grid for cell in row)
+soldats_ia = sum(cell == 2 for row in st.session_state.grid for cell in row)
+st.write(f"Soldats Joueur 1 (rouge) : {soldats_j1}/{st.session_state.max_soldats_j1} | Soldats IA (bleu) : {soldats_ia}/{st.session_state.max_soldats_ia}")
+
+# Affichage de la grille avec clés uniques
+grid_key_prefix = f"grid-{random.randint(0, 1000000)}"
+for i in range(3):
+    cols = st.columns(3)
+    for j in range(3):
+        cell = st.session_state.grid[i][j]
+        if cell == 0:
+            label = "🟩"
+        elif cell == 1:
+            label = "🟥🪖"
+        else:
+            label = "🟦🪖"
+        if cols[j].button(label, key=f"{grid_key_prefix}-{i}-{j}"):
+            st.session_state.selected = (i, j)
+
+st.write(f"Case sélectionnée : {st.session_state.selected}")
+
+# Tour du joueur 1
+if st.session_state.tour == 1:
+    if st.button("Placer un soldat rouge (Joueur 1) sur la case sélectionnée", key=f"place-soldat-{random.randint(0,1000000)}"):
+        i, j = st.session_state.selected
+        if st.session_state.grid[i][j] == 0:
+            if soldats_j1 < st.session_state.max_soldats_j1:
+                st.session_state.grid[i][j] = 1
+                st.success("Soldat rouge placé !")
+                st.session_state.tour = 2
+            else:
+                st.warning("Nombre maximum de soldats placés !")
+        else:
+            st.info("Il y a déjà un soldat ici.")
+
+# Tour de l'IA (joueur 2)
+if st.session_state.tour == 2:
+    empty_cells = [(i, j) for i in range(3) for j in range(3) if st.session_state.grid[i][j] == 0]
+    if empty_cells and soldats_ia < st.session_state.max_soldats_ia:
+        ia_choice = random.choice(empty_cells)
+        st.session_state.grid[ia_choice[0]][ia_choice[1]] = 2
+        st.info(f"L'IA (bleu) a placé un soldat en case {ia_choice}")
+        st.session_state.tour = 1
+import streamlit as st
+import random
+
+# Initialisation de la grille (0 = vide, 1 = soldat joueur 1, 2 = soldat IA)
+if 'grid' not in st.session_state:
+    st.session_state.grid = [[0 for _ in range(3)] for _ in range(3)]
+if 'selected' not in st.session_state:
+    st.session_state.selected = (0, 0)
+if 'tour' not in st.session_state:
+    st.session_state.tour = 1  # 1 = joueur 1, 2 = IA
+
+st.title("Placement des soldats sur la grille 3x3")
+
+# Affichage de la grille
+for i in range(3):
+    cols = st.columns(3)
+    for j in range(3):
+        cell = st.session_state.grid[i][j]
+        if cell == 0:
+            label = "🟩"
+        elif cell == 1:
+            label = "🟥🪖"
+        else:
+            label = "🟦🪖"
+        if cols[j].button(label, key=f"grid-btn-{i}-{j}"):
+            st.session_state.selected = (i, j)
+
+st.write(f"Case sélectionnée : {st.session_state.selected}")
+
+# Tour du joueur 1
+if st.session_state.tour == 1:
+    if st.button("Placer un soldat rouge (Joueur 1) sur la case sélectionnée"):
+        i, j = st.session_state.selected
+        if st.session_state.grid[i][j] == 0:
+            st.session_state.grid[i][j] = 1
+            st.success("Soldat rouge placé !")
+            st.session_state.tour = 2
+        else:
+            st.info("Il y a déjà un soldat ici.")
+
+# Tour de l'IA (joueur 2)
+if st.session_state.tour == 2:
+    # IA choisit une case vide aléatoire
+    empty_cells = [(i, j) for i in range(3) for j in range(3) if st.session_state.grid[i][j] == 0]
+    if empty_cells:
+        ia_choice = random.choice(empty_cells)
+        st.session_state.grid[ia_choice[0]][ia_choice[1]] = 2
+        st.info(f"L'IA (bleu) a placé un soldat en case {ia_choice}")
+        st.session_state.tour = 1
+
+# Affichage du nombre de soldats placés
+soldats_j1 = sum(cell == 1 for row in st.session_state.grid for cell in row)
+soldats_ia = sum(cell == 2 for row in st.session_state.grid for cell in row)
+st.write(f"Soldats Joueur 1 (rouge) : {soldats_j1} | Soldats IA (bleu) : {soldats_ia}")
+import streamlit as st
 import time
 
 # Initialisation des ressources et points de vie
@@ -163,12 +278,9 @@ class Game :
             print(f"{self.joueur2.nom} a gagné!")
 if __name__ == "__main__":
     import random
-    print("Choisissez le mode de jeu :")
-    print("1 - Joueur contre Joueur (JcJ)")
-    print("2 - Joueur contre IA (JcIA)")
-    mode = input("Entrez 1 ou 2 : ")
+    mode = st.radio("Choisissez le mode de jeu :", ["Joueur vs Joueur", "Joueur vs IA"])
     nom1 = input("Nom du joueur 1: ")
-    if mode == '2':
+    if mode == 'Joueur vs IA':
         nom2 = "IA"
         ia_mode = True
     else:
