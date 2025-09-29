@@ -169,8 +169,6 @@ if st.button("Valider le tour"):
                                 msg_joueur += "Égalité, rien ne se passe.\n"
             st.success(msg_joueur if msg_joueur else "Aucun soldat à vous sur la grille pour attaquer.")
 
-        st.success(msg_joueur)
-
         # IA joue immédiatement après
         if mode == "Joueur vs IA" and st.session_state.base_j2 > 0:
             ia_action = random.choice(actions)
@@ -266,7 +264,7 @@ if st.button("Valider le tour"):
                     msg_ia = f"L'IA récolte {or_miner} or."
 
             st.info(msg_ia)
-        # Passage au tour suivant
+        # Passage au tour suivant=+
         st.session_state.tour = 1 if mode == "Joueur vs IA" else 2
 
     # Joueur 2 (si mode JcJ)
@@ -309,16 +307,6 @@ if st.button("Valider le tour"):
         st.success(msg_joueur2)
         st.session_state.tour = 1
 
-
-elif st.session_state.tour == 2 and mode == "Joueur vs Joueur":
-    if st.button("Construire un soldat (coût : 10 bois, 5 or)", key="construire_j2"):
-        if st.session_state.bois_j2 >= 10 and st.session_state.or_j2 >= 5:
-            st.session_state.bois_j2 -= 10
-            st.session_state.or_j2 -= 5
-            st.session_state.max_soldats_j2 += 1
-            st.success("Joueur 2 a construit un soldat !")
-        else:
-            st.warning("Pas assez de ressources pour construire un soldat.")
 
 # Fin de partie si une base est détruite
 if st.session_state.base_j1 <= 0 or st.session_state.base_j2 <= 0:
